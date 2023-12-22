@@ -27,7 +27,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        if User.objects.filter(username=data['username'], password=data['password']).exists():
+        if not User.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError('account not found')
         return data
 
