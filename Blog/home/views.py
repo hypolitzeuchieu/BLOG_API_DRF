@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from .models import Blog
 from .serializers import BlogSerializers
+from django.db.models import Q
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers
@@ -12,6 +14,26 @@ class BlogView(APIView):
 
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        try:
+            blogs = Blog.objects.filter(user=request.user)
+            if request.GET.get('search'):
+                search = request.GET.get('search')
+                blogs = blogs.filter(Q(title__icontains=search) | Q(blog_text__icontains=search))
+
+            serializer = BlogSerializers(blogs, many=True)
+
+            return Response({
+                'data': serializer.data,
+                'message': 'blogs fetched successfully'
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(e)
+            Response({
+                'data': {},
+                'message': 'invalid credentials'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
 
