@@ -50,5 +50,5 @@ class LoginUser(APIView):
             print(e)
             return Response({
                 'data': {},
-                'message': 'something went wrong'
+                'message': 'invalid credentials'
             })
