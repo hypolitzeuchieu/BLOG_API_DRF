@@ -97,3 +97,37 @@ class BlogView(APIView):
                 'data': {},
                 'message': 'invalid credentials'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        try:
+            data = request.data
+            data['user'] = request.user.id
+            blogs = Blog.objects.filter(uid=data.get('uid'))
+
+            serializer = BlogSerializers(data=data)
+
+
+            if not blogs.exists():
+                return Response({
+                    'data': {},
+                    'message': 'invalid blog uid'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if request.user != blogs[0].user:
+                return Response({
+                    'data': {},
+                    'message': ' you are not authorized to this'
+                   }, status=status.HTTP_400_BAD_REQUEST)
+
+            blogs[0].delete()
+            return Response({
+                        'data': serializer.data,
+                        'message': 'blog deleted successfully'
+                    }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data': {},
+                'message': 'invalid credentials'
+            }, status=status.HTTP_400_BAD_REQUEST)
